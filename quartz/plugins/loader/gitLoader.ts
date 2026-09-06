@@ -324,7 +324,21 @@ function trySymlink(target: string, linkPath: string): void {
   try {
     fs.symlinkSync(target, linkPath, "dir")
   } catch (err: unknown) {
-    if ((err as NodeJS.ErrnoException).code === "EEXIST") return
+    const code = (err as NodeJS.ErrnoException).code
+    if (code === "EEXIST") return
+    // Windows отдаёт EPERM на симлинки типа "dir" без прав администратора или
+    // включённого Developer Mode. Junction тех же прав не требует, но принимает
+    // только абсолютный путь — поэтому относительный target разворачиваем.
+    if (code === "EPERM" || code === "EACCES") {
+      const absoluteTarget = path.resolve(path.dirname(linkPath), target)
+      try {
+        fs.symlinkSync(absoluteTarget, linkPath, "junction")
+        return
+      } catch (fallbackErr: unknown) {
+        if ((fallbackErr as NodeJS.ErrnoException).code === "EEXIST") return
+        throw fallbackErr
+      }
+    }
     throw err
   }
 }
@@ -473,7 +487,7 @@ export async function installPlugin(
       console.log(styleText("cyan", `→`), `Linking ${spec.name} from ${spec.repo}...`)
     }
 
-    fs.symlinkSync(spec.repo, pluginDir, "dir")
+    trySymlink(spec.repo, pluginDir)
 
     if (options.verbose) {
       console.log(styleText("green", `✓`), `Linked ${spec.name}`)

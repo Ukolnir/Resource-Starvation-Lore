@@ -13,35 +13,36 @@ configuration:
     - templates
     - .obsidian
     - _Мастерское
+    - Мастерское
     - _Шаблоны
   theme:
     fontOrigin: googleFonts
     cdnCaching: true
     typography:
-      header: Schibsted Grotesk
-      body: Source Sans Pro
-      code: IBM Plex Mono
+      header: Exo 2
+      body: Exo 2
+      code: JetBrains Mono
     colors:
       lightMode:
-        light: "#faf8f8"
-        lightgray: "#e5e5e5"
-        gray: "#b8b8b8"
-        darkgray: "#4e4e4e"
-        dark: "#2b2b2b"
-        secondary: "#284b63"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#fff23688"
+        light: "#0a0e16"
+        lightgray: "#1f2a36"
+        gray: "#6e7c8c"
+        darkgray: "#c8d0e0"
+        dark: "#e8edf3"
+        secondary: "#5fc4d4"
+        tertiary: "#d97548"
+        highlight: rgba(95, 196, 212, 0.08)
+        textHighlight: "#e8b84a88"
       darkMode:
-        light: "#161618"
-        lightgray: "#393639"
-        gray: "#646464"
-        darkgray: "#d4d4d4"
-        dark: "#ebebec"
-        secondary: "#7b97aa"
-        tertiary: "#84a59d"
-        highlight: rgba(143, 159, 169, 0.15)
-        textHighlight: "#b3aa0288"
+        light: "#0a0e16"
+        lightgray: "#1f2a36"
+        gray: "#6e7c8c"
+        darkgray: "#c8d0e0"
+        dark: "#e8edf3"
+        secondary: "#5fc4d4"
+        tertiary: "#d97548"
+        highlight: rgba(95, 196, 212, 0.08)
+        textHighlight: "#e8b84a88"
 plugins:
   - source: "@quartz-community/created-modified-date"
     enabled: true
@@ -55,9 +56,11 @@ plugins:
   - source: "@quartz-community/syntax-highlighting"
     enabled: true
     options:
+      # Обе схемы тёмные: атрибут saved-theme ставит плагин darkmode, а он
+      # выключен, поэтому без этого применялась бы светлая тема кода.
       theme:
-        light: github-light
-        dark: github-dark
+        light: tokyo-night
+        dark: tokyo-night
       keepBackground: false
     order: 20
   - source: "@quartz-community/obsidian-flavored-markdown"
@@ -112,8 +115,41 @@ plugins:
     order: 92
   - source: "@quartz-community/quartz-fonts"
     enabled: true
+    options:
+      useThemeFonts: false
+      fontOrigin: googleFonts
+      # Тело статей — Exo 2, интерфейс и мелкие лейблы — JetBrains Mono.
+      body:
+        name: Exo 2
+        weights: [400, 600, 700]
+        includeItalic: true
+      header:
+        name: Exo 2
+        weights: [600, 700]
+      # h3-h6 работают как терминальные подписи капсом, поэтому моноширинные
+      h3:
+        name: JetBrains Mono
+        weights: [500, 700]
+      h4:
+        name: JetBrains Mono
+        weights: [500, 700]
+      h5:
+        name: JetBrains Mono
+        weights: [500, 700]
+      h6:
+        name: JetBrains Mono
+        weights: [500, 700]
+      title:
+        name: JetBrains Mono
+        weights: [500, 700]
+      code:
+        name: JetBrains Mono
+        weights: [400, 500, 700]
+      interface:
+        name: JetBrains Mono
+        weights: [400, 500, 600]
   - source: "@quartz-themes/core"
-    enabled: true
+    enabled: false
     options:
       theme: tokyo-night
       mode: both
@@ -149,8 +185,11 @@ plugins:
     enabled: true
   - source: "@quartz-community/og-image"
     enabled: true
+  # Плагин пишет в public/CNAME хост из baseUrl. Для проектной страницы это
+  # был бы "ukolnir.github.io" — GitHub принял бы его за кастомный домен и
+  # сайт сломался бы. Включать только под собственный домен.
   - source: "@quartz-community/cname"
-    enabled: true
+    enabled: false
   - source: "@quartz-community/canvas-page"
     enabled: true
   - source: "@quartz-community/content-page"
@@ -203,7 +242,7 @@ plugins:
       position: left
       priority: 10
   - source: "@quartz-community/darkmode"
-    enabled: true
+    enabled: false
     layout:
       position: left
       priority: 30
@@ -216,6 +255,8 @@ plugins:
       group: toolbar
   - source: "@quartz-community/breadcrumbs"
     enabled: true
+    options:
+      rootName: Магнатрон
     layout:
       position: beforeBody
       priority: 5
@@ -231,9 +272,9 @@ plugins:
   - source: "@quartz-community/footer"
     enabled: true
     options:
-      links:
-        GitHub: https://github.com/jackyzha0/quartz
-        Discord Community: https://discord.gg/cRFFHYye7t
+      # Здесь были ссылки на репозиторий и Discord самого Quartz — на нашем
+      # сайте они читались бы как наши. Свои ссылки добавляй сюда же.
+      links: {}
     layout:
       position: footer
       priority: 50

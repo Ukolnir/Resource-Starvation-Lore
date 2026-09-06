@@ -1,17 +1,43 @@
-# Quartz v5
+# Магнатрон
 
-> “[One] who works with the door open gets all kinds of interruptions, but [they] also occasionally gets clues as to what the world is and what might be important.” — Richard Hamming
+Путеводитель по сеттингу **Resource Starvation** — индустриальному миру, живущему на хроническом дефиците ресурсов.
 
-Quartz is a set of tools that helps you publish your [digital garden](https://jzhao.xyz/posts/networked-thought) and notes as a website for free.
+Сайт: <https://ukolnir.github.io/Resource-Starvation-Lore/>
 
-🔗 Read the documentation and get started: https://quartz.jzhao.xyz/
+> [!note]
+> Здесь только то, что могут знать персонажи. Мастерские материалы — тайны мира, статы, спойлеры — хранятся отдельно и в этот репозиторий не попадают.
 
-[Join the Discord Community](https://discord.gg/cRFFHYye7t)
+## Что внутри
 
-## Sponsors
+| | |
+| --- | --- |
+| `content/` | сам лор в Markdown |
+| `quartz/styles/custom.scss` | оформление: тема «Resource Starvation Terminal» |
+| `quartz.config.yaml` | палитра, шрифты, плагины |
+| `.github/workflows/deploy.yml` | сборка и публикация на GitHub Pages |
 
-<p align="center">
-  <a href="https://github.com/sponsors/jackyzha0">
-    <img src="https://cdn.jsdelivr.net/gh/jackyzha0/jackyzha0/sponsorkit/sponsors.svg" />
-  </a>
-</p>
+Оформление повторяет интерфейс нашего виртуального стола: палитра, срезанные углы панелей, текстура и шрифты (Exo 2 и JetBrains Mono) перенесены оттуда.
+
+## Локальный запуск
+
+```bash
+npm install
+npx quartz build --serve
+```
+
+Сайт поднимется на <http://localhost:8080>.
+
+> [!warning]
+> Пока работает `--serve`, не запускай `npx quartz build` отдельно. Обычная сборка проставляет страницам путь публикации `/Resource-Starvation-Lore`, а дев-сервер отдаёт сайт из корня — переходы начнут падать в 404. Дев-сервер и так пересобирает всё сам при изменениях.
+
+## Публикация
+
+Сборка и выкладка происходят автоматически при пуше в ветку `v5`. Чтобы это заработало, в настройках репозитория (**Settings → Pages → Source**) должен быть выбран **GitHub Actions**.
+
+Перед публикацией workflow проверяет, что в собранном сайте нет страниц с «мастерск» в имени, и роняет сборку, если такие нашлись.
+
+## Движок и лицензии
+
+Сайт собирается [Quartz v5](https://quartz.jzhao.xyz/) — это форк, движок распространяется по лицензии MIT (см. `LICENSE.txt`, © jackyzha0). Каталог `docs/` — документация Quartz, оставлена как справочник.
+
+Лицензия MIT относится **только к движку**. Тексты сеттинга в `content/` — отдельная работа, и на них она не распространяется.

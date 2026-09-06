@@ -1,0 +1,85 @@
+name: Публикация сайта на GitHub Pages
+
+on:
+  push:
+    # Ветка называется v5 — наследие форка Quartz. main указан на случай
+    # переименования, чтобы деплой не отвалился молча.
+    branches: [v5, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Публикуем по одной сборке за раз, но начатую не обрываем: иначе
+# наполовину выложенный сайт может остаться в неопределённом состоянии.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Сборка
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Плагин дат берёт время создания и изменения страниц из истории,
+          # поэтому нужна полная история, а не поверхностная копия.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Кэш зависимостей
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Кэш плагинов Quartz
+        uses: actions/cache@v5
+        with:
+          path: .quartz/plugins
+          key: ${{ runner.os }}-plugins-${{ hashFiles('quartz.lock.json') }}
+          restore-keys: ${{ runner.os }}-plugins-
+
+      - name: Установка зависимостей
+        run: npm ci
+
+      - name: Установка плагинов Quartz
+        run: npx quartz plugin install
+
+      - name: Сборка сайта
+        run: npx quartz build
+
+      - name: Проверка, что мастерское не попало в сборку
+        # Страховка на случай, если мастерская заметка окажется в публичном
+        # репозитории: лучше уронить публикацию, чем выложить её в сеть.
+        run: |
+          if find public -iname '*мастерск*' -print -quit | grep -q .; then
+            echo '::error::В сборке найдены страницы с «мастерск» в имени. Публикация остановлена.'
+            find public -iname '*мастерск*'
+            exit 1
+          fi
+          echo 'Мастерского в сборке нет.'
+
+      - name: Загрузка артефакта
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    name: Публикация
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Публикация на GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

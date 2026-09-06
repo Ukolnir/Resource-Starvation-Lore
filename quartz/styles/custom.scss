@@ -1,3 +1,369 @@
 @use "./variables.scss" as *;
 
-// put your custom CSS here!
+/* ===========================================================================
+   Resource Starvation Terminal
+   Стиль перенесён из VTT: client/src/views/WikiView.vue (вики) и LoginView.vue
+   (внешние экраны). Девять токенов палитры живут в quartz.config.yaml;
+   здесь — то, что в девять токенов не помещается.
+   =========================================================================== */
+
+:root {
+  /* Оттенки терминала сверх базовых токенов Quartz */
+  --rs-bg-panel: #0d1520; /* фон сайдбара вики */
+  --rs-bg-code: #11161f; /* подложка инлайн-кода */
+  --rs-border-strong: #2a3540; /* рамка панелей и кода */
+  --rs-text-bright: #e8edf3; /* strong, h2 */
+  --rs-text-dim: #8a96a8; /* h3 и подписи */
+  --rs-text-faint: #6e7c8c; /* заголовки разделов */
+  --rs-text-em: #b6c0cf; /* курсив */
+  --rs-accent: #5fc4d4;
+  --rs-accent-soft: rgba(95, 196, 212, 0.08); /* ховер пункта */
+  --rs-accent-active: rgba(95, 196, 212, 0.12); /* активный пункт */
+
+  /* Интерфейс моноширинный, тело статей — Exo 2 */
+  --rs-uiFont: "JetBrains Mono", ui-monospace, "Consolas", monospace;
+  --rs-textFont: "Exo 2", "Segoe UI", system-ui, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Плагин quartz-fonts эмитит имя семейства без кавычек (`--bodyFont: Exo 2`).
+   Для "JetBrains Mono" это валидно, а "2" не может быть CSS-идентификатором,
+   поэтому вся декларация отбрасывается и текст падает в Times New Roman.
+   Плагин пишет в @layer quartz-fonts, а этот файл эмитится вне слоёв —
+   значит заквотированные значения отсюда выигрывают в каскаде.
+   Загрузку с Google Fonts плагин при этом делает правильно, её не трогаем.
+   --------------------------------------------------------------------------- */
+:root {
+  --bodyFont: var(--rs-textFont);
+  --headerFont: var(--rs-textFont);
+  --font-text: var(--rs-textFont);
+  --h1-font: var(--rs-textFont);
+  --h2-font: var(--rs-textFont);
+}
+
+.page article h1,
+.page article h2,
+.article-title {
+  font-family: var(--rs-textFont);
+}
+
+/* --- Скроллбар: 4px, ползунок подсвечивается цианом --------------------- */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0f17;
+}
+::-webkit-scrollbar-thumb {
+  background: #1a2530;
+  border-radius: 2px;
+
+  &:hover {
+    background: var(--rs-accent);
+  }
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1a2530 #0a0f17;
+}
+
+/* --- Типографика статьи ------------------------------------------------- */
+.article-title,
+.page article > h1 {
+  color: var(--rs-accent);
+  letter-spacing: 0.02em;
+}
+
+.page article {
+  h2 {
+    color: var(--rs-text-bright);
+  }
+
+  /* h3 и ниже — капс с разрядкой, как section-title в сайдбаре VTT */
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--rs-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  strong {
+    color: var(--rs-text-bright);
+  }
+
+  em {
+    color: var(--rs-text-em);
+  }
+}
+
+/* Инлайн-код: циан в рамке. Блоки кода не трогаем — у них своя тема. */
+:not(pre) > code {
+  background: var(--rs-bg-code);
+  border: 1px solid var(--rs-border-strong);
+  border-radius: 3px;
+  color: var(--rs-accent);
+  padding: 0.05rem 0.3rem;
+}
+
+/* Заголовки таблиц — капсом, как лейблы терминала */
+th {
+  font-family: var(--rs-uiFont);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--rs-text-dim);
+  border-bottom: 2px solid var(--rs-border-strong);
+}
+
+/* --- Интерфейс: всё моноширинное ---------------------------------------- */
+.sidebar,
+.explorer,
+.toc,
+.breadcrumb-container,
+.backlinks,
+.content-meta,
+footer {
+  font-family: var(--rs-uiFont);
+}
+
+/* Название сайта — как sidebar-title в VTT */
+.page-title a {
+  font-family: var(--rs-uiFont);
+  color: var(--rs-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+/* Заголовки боковых блоков — капс с разрядкой, приглушённые */
+.toc-header > h3,
+.backlinks > h3,
+.graph > h3 {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--rs-text-faint);
+}
+
+/* --- Дерево разделов ----------------------------------------------------- */
+.explorer {
+  .folder-title {
+    font-family: var(--rs-uiFont);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--rs-text-faint);
+  }
+
+  /* Пункт: полоска слева, подсветка на ховере, циан на активном.
+     font-family задаём явно: quartz-base вешает на .folder-container div > a
+     var(--headerFont), а он теперь Exo 2 — иначе дерево уедет с моно. */
+  a {
+    font-family: var(--rs-uiFont);
+    font-size: 0.85rem;
+    display: block;
+    padding: 0.32rem 0.6rem;
+    border-left: 2px solid transparent;
+    border-radius: 0 4px 4px 0;
+    background-color: transparent;
+    color: var(--darkgray);
+    transition:
+      background-color 0.12s,
+      color 0.12s,
+      border-color 0.12s;
+
+    &:hover {
+      background-color: var(--rs-accent-soft);
+      color: var(--rs-text-bright);
+    }
+
+    &.active {
+      background-color: var(--rs-accent-active);
+      border-left-color: var(--rs-accent);
+      color: var(--rs-accent);
+    }
+  }
+}
+
+/* Хлебные крошки, метаданные и подвал — мелкие приглушённые лейблы */
+.breadcrumb-container,
+.content-meta {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--rs-text-faint);
+}
+
+/* Подвал шёл тем же кеглем, что и текст статьи, и перетягивал внимание */
+footer {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--rs-text-faint);
+
+  p {
+    line-height: 1.4;
+  }
+
+  a {
+    color: var(--rs-text-dim);
+
+    &:hover {
+      color: var(--rs-accent);
+    }
+  }
+}
+
+/* ===========================================================================
+   ОБВЯЗКА — то, что делает стиль узнаваемым.
+   Источники: LoginView.vue (чешуя + сетка), GameSettingsView.vue (срезы
+   и панели), GameRoomView.vue (свечение акцента).
+   =========================================================================== */
+
+/* Срез правого верхнего угла — так оформлены панели в VTT.
+   border-radius обнуляем: скругление и срез вместе выглядят грязно. */
+@mixin cut-corner($size: 12px) {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - #{$size}) 0, 100% #{$size}, 100% 100%, 0 100%);
+}
+
+/* Срез двух противоположных углов — так оформлены кнопки */
+@mixin cut-corner-both($size: 8px) {
+  border-radius: 0;
+  clip-path: polygon(
+    0 0,
+    calc(100% - #{$size}) 0,
+    100% #{$size},
+    100% 100%,
+    #{$size} 100%,
+    0 calc(100% - #{$size})
+  );
+}
+
+/* Панель терминала: тёмная подложка в тонкой рамке */
+@mixin panel($cut: 12px) {
+  background-color: var(--rs-bg-panel);
+  border: 1px solid var(--lightgray);
+  @include cut-corner($cut);
+}
+
+/* --- Фон: чешуя под радиальным затемнением + сетка 32×32 ----------------
+   Цвета и коэффициенты — как в LoginView: центргасим почти в ноль, чтобы
+   текст читался, к краям чешуя проявляется.
+   Путь относительный: таблица стилей лежит в корне сайта, поэтому ссылка
+   переживёт публикацию в подпапку вида /Resource-Starvation-Lore/. */
+html {
+  background-color: var(--light);
+}
+
+body {
+  background-color: transparent;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {
+  background-image:
+    radial-gradient(ellipse at center, rgba(10, 14, 22, 0.98) 82%, rgba(10, 14, 22, 0.3) 100%),
+    url("static/dragon-scales.jpg");
+  background-size: cover;
+  background-position: center;
+  /* грейскейл убирает радужность чешуи, brightness гасит её в фон */
+  filter: grayscale(0.7) brightness(0.5) contrast(0.9);
+}
+
+body::after {
+  background-image:
+    linear-gradient(rgba(74, 94, 116, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 94, 116, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* --- Выноски: главный блок в лорных текстах ----------------------------- */
+.callout {
+  @include cut-corner(14px);
+}
+
+/* --- Панели правой колонки: граф, оглавление, обратные ссылки ------------ */
+.graph .graph-outer {
+  @include panel(12px);
+  border-color: var(--lightgray);
+}
+
+.sidebar.right > .toc,
+.sidebar.right > .backlinks {
+  @include panel(12px);
+  padding: 0.8rem 0.9rem;
+}
+
+/* Подпись панели — циан капсом с широкой разрядкой (block-label из VTT) */
+.toc-header > h3,
+.backlinks > h3,
+.graph > h3 {
+  color: var(--rs-accent);
+  letter-spacing: 0.2em;
+  margin-top: 0;
+}
+
+/* --- Поиск --------------------------------------------------------------- */
+.search .search-button {
+  @include cut-corner-both(8px);
+  background-color: var(--rs-bg-panel);
+  border: 1px solid var(--lightgray);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--rs-accent);
+    box-shadow: 0 0 8px rgba(95, 196, 212, 0.25);
+  }
+}
+
+.search .search-container > div {
+  @include cut-corner(14px);
+  background-color: var(--rs-bg-panel);
+  border: 1px solid var(--lightgray);
+}
+
+/* --- Блоки кода ---------------------------------------------------------- */
+figure[data-rehype-pretty-code-figure] > pre,
+article > pre {
+  @include cut-corner(10px);
+  border: 1px solid var(--rs-border-strong);
+  background-color: var(--rs-bg-code);
+}
+
+/* --- Свечение акцента ---------------------------------------------------- */
+
+/* Активный пункт дерева: полоска слева светится, как индикатор в VTT */
+.explorer a.active {
+  box-shadow: inset 2px 0 6px -2px var(--rs-accent);
+}
+
+/* Ссылки внутри статьи подсвечиваются на наведении */
+.page article a.internal:hover {
+  box-shadow: 0 0 8px rgba(95, 196, 212, 0.2);
+}
+
+/* Заголовок сайта — с лёгким свечением, как подсвеченный текст на терминале */
+.page-title a {
+  text-shadow: 0 0 12px rgba(95, 196, 212, 0.35);
+}
+
+/* --- Таблицы ------------------------------------------------------------- */
+.table-container > table {
+  background-color: rgba(13, 21, 32, 0.6);
+  border: 1px solid var(--lightgray);
+  @include cut-corner(10px);
+}

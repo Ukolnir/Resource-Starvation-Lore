@@ -155,8 +155,10 @@ plugins:
       mode: both
   - source: "@quartz-community/remove-draft"
     enabled: true
+  # Второй рубеж после publish.mjs: даже если сюда попадёт заметка без
+  # пометки publish: true, в сайт она не соберётся.
   - source: "@quartz-community/explicit-publish"
-    enabled: false
+    enabled: true
   - source: "@quartz-community/unlisted-pages"
     enabled: true
     options: {}

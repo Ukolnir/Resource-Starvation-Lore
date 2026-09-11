@@ -1,0 +1,28 @@
+{
+  "name": "section-nav",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./components": "./components/index.js",
+    "./package.json": "./package.json"
+  },
+  "quartz": {
+    "name": "section-nav",
+    "displayName": "Section Nav",
+    "category": "component",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {},
+    "components": {
+      "SectionNav": {
+        "displayName": "Section Nav",
+        "defaultPosition": "left",
+        "defaultPriority": 40
+      }
+    }
+  }
+}

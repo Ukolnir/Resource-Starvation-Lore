@@ -367,3 +367,80 @@ article > pre {
   border: 1px solid var(--lightgray);
   @include cut-corner(10px);
 }
+
+/* --- Верхний уровень Проводника = вкладки-закладки разделов ---------------
+   Сеттинг · Правила · (Бестиарий) — кнопки перехода в раздел, а не узлы
+   дерева. Клик ведёт на страницу раздела (folderClickBehavior: link).
+   Внутренняя структура раскрыта только у активного раздела (у него
+   .folder-outer получает класс .open). Вложенные папки не трогаем: селекторы
+   бьют только по прямым детям .explorer-ul. */
+.explorer-ul > li {
+  margin-bottom: 0.35rem;
+
+  /* сам «таб» */
+  > .folder-container {
+    padding: 0;
+    border-left: 3px solid var(--rs-border-strong);
+    background: var(--rs-bg-code);
+    transition:
+      border-color 0.12s,
+      background-color 0.12s;
+
+    > .folder-icon {
+      display: none; /* без раскрывашки — это кнопка */
+    }
+    > div {
+      flex: 1;
+    }
+
+    /* ссылка-кнопка занимает весь таб; снимаем вложенную полоску от .explorer a */
+    a.folder-button {
+      display: block;
+      width: 100%;
+      padding: 0.42rem 0.6rem;
+      border-left: none;
+      border-radius: 0;
+      background: transparent;
+
+      &:hover {
+        background: transparent;
+        color: var(--rs-text-bright);
+      }
+    }
+    .folder-title {
+      font-size: 0.82rem;
+      color: var(--rs-text-dim);
+    }
+
+    &:hover {
+      border-left-color: var(--rs-accent);
+      background: var(--rs-accent-soft);
+      .folder-title {
+        color: var(--rs-text-bright);
+      }
+    }
+  }
+
+  /* активный раздел — подсвеченная закладка */
+  &:has(.folder-outer.open) > .folder-container {
+    border-left-color: var(--rs-accent);
+    background: var(--rs-accent-active);
+    .folder-title {
+      color: var(--rs-accent);
+    }
+  }
+
+  /* содержимое активного раздела — отступ «внутрь» от закладки */
+  > .folder-outer {
+    margin: 0.15rem 0 0.4rem 0.5rem;
+    border-left: 1px solid var(--rs-border-strong);
+    padding-left: 0.25rem;
+  }
+}
+
+/* --- Авто-листинг папок (folder-page) ------------------------------------
+   На индексах разделов показываем только свой текст index.md, без служебного
+   блока «в этой папке N элементов» и списка карточек с датами. */
+.page-listing {
+  display: none;
+}

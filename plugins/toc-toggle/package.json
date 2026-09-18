@@ -1,0 +1,28 @@
+{
+  "name": "toc-toggle",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./components": "./components/index.js",
+    "./package.json": "./package.json"
+  },
+  "quartz": {
+    "name": "toc-toggle",
+    "displayName": "TOC toggle (кнопка показа/скрытия оглавления)",
+    "category": "component",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {},
+    "components": {
+      "TocToggle": {
+        "displayName": "TocToggle",
+        "defaultPosition": "left",
+        "defaultPriority": 37
+      }
+    }
+  }
+}

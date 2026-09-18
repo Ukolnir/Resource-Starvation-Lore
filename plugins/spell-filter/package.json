@@ -1,0 +1,28 @@
+{
+  "name": "spell-filter",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./components": "./components/index.js",
+    "./package.json": "./package.json"
+  },
+  "quartz": {
+    "name": "spell-filter",
+    "displayName": "Spell filter (фильтруемый список заклинаний)",
+    "category": "component",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {},
+    "components": {
+      "SpellFilter": {
+        "displayName": "SpellFilter",
+        "defaultPosition": "beforeBody",
+        "defaultPriority": 25
+      }
+    }
+  }
+}

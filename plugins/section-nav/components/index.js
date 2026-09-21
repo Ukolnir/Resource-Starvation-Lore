@@ -81,9 +81,8 @@ const SectionNav = ({ fileData, allFiles, displayClass }) => {
   // скрытые страницы (unlisted: глоссарий, микро-страницы терминов) — мимо навигации
   const isHidden = (f) => f.unlisted === true || f.frontmatter?.unlisted === true
 
-  // L1 (разделы-вкладки) и L2→L3 (дерево активного раздела)
+  // L1 (разделы-вкладки)
   const l1set = new Set()
-  const l2map = new Map() // l2seg -> Set(l3seg)  (пустой набор = L2 без вложенности)
   for (const f of allFiles) {
     if (isHidden(f)) continue
     const segs = (f.slug || "").split("/")
@@ -91,12 +90,6 @@ const SectionNav = ({ fileData, allFiles, displayClass }) => {
     if (!s0 || s0 === "tags" || s0 === "index") continue
     if (segs.length < 2) continue // страница в корне — не раздел
     l1set.add(s0)
-    if (s0 !== curL1) continue // дерево строим только для активного раздела
-    const s1 = segs[1]
-    if (!s1 || s1 === "index") continue
-    if (!l2map.has(s1)) l2map.set(s1, new Set())
-    const s2 = segs[2] // 3-й уровень
-    if (s2 && s2 !== "index") l2map.get(s1).add(s2)
   }
   const l1s = sortSegs([...l1set], "")
 
@@ -108,50 +101,58 @@ const SectionNav = ({ fileData, allFiles, displayClass }) => {
     ),
   )
 
+  // Дерево активного раздела ПРОИЗВОЛЬНОЙ вложенности: L2 → L3 → L4 → …
+  // Любая папка (есть дети или свой index) раскрывается шевроном; лист — ссылка.
+  const tree = { slug: curL1, children: new Map() }
+  if (curL1) {
+    for (const f of allFiles) {
+      if (isHidden(f)) continue
+      const segs = (f.slug || "").split("/")
+      if (segs[0] !== curL1) continue
+      let node = tree
+      let acc = curL1
+      for (const seg of segs.slice(1)) {
+        if (seg === "index") continue // index — это лендинг своей папки, не отдельный пункт
+        acc = `${acc}/${seg}`
+        if (!node.children.has(seg)) node.children.set(seg, { slug: acc, children: new Map() })
+        node = node.children.get(seg)
+      }
+    }
+  }
+
+  const isActive = (slug) => curSlug === slug || curSlug === `${slug}/index`
+  const onPath = (slug) => curSlug === slug || curSlug.startsWith(`${slug}/`) // текущая страница внутри папки
+
+  const renderNodes = (node) =>
+    sortSegs([...node.children.keys()], node.slug).map((seg) => {
+      const child = node.children.get(seg)
+      const cslug = child.slug
+      const hasKids = child.children.size > 0
+      const isFolder = hasKids || hasIndex.has(cslug)
+      const row = h(
+        "div",
+        { class: "subnav-row" },
+        h(
+          "a",
+          { class: classNames("subnav-item", isActive(cslug) && "active", isFolder && "is-folder"), href: hrefFor(cslug) },
+          titleOf(cslug),
+        ),
+        hasKids
+          ? h("button", { class: "chev-btn", type: "button", "aria-label": "Развернуть" }, h("span", { class: "chev" }))
+          : null,
+      )
+      if (!hasKids) return row // лист или папка-без-детей (только лендинг) — просто ссылка
+      return h(
+        "div",
+        { class: classNames("subnav-group", onPath(cslug) && "open"), "data-slug": cslug },
+        row,
+        h("div", { class: "subnav-children" }, ...renderNodes(child)),
+      )
+    })
+
   let sub = null
-  if (curL1 && l2map.size) {
-    const l2s = sortSegs([...l2map.keys()], curL1)
-    sub = h(
-      "nav",
-      { class: "section-subnav" },
-      l2s.map((l2) => {
-        const slug = `${curL1}/${l2}`
-        const children = sortSegs([...l2map.get(l2)], slug)
-        const hasKids = children.length > 0
-        const isFolder = hasKids || hasIndex.has(slug)
-        const openNow = l2 === curL2 && hasKids // активная ветка раскрыта на старте
-
-        // ссылка-лейбл (уводит в раздел) + кнопка-шеврон справа (раскрывает L3)
-        const row = h(
-          "div",
-          { class: "subnav-row" },
-          h(
-            "a",
-            { class: classNames("subnav-item", l2 === curL2 && "active", isFolder && "is-folder"), href: hrefFor(slug) },
-            titleOf(slug),
-          ),
-          hasKids
-            ? h("button", { class: "chev-btn", type: "button", "aria-label": "Развернуть" }, h("span", { class: "chev" }))
-            : null,
-        )
-
-        const kidsWrap = hasKids
-          ? h(
-              "div",
-              { class: "subnav-children" },
-              children.map((l3) =>
-                h(
-                  "a",
-                  { class: classNames("subnav-child", cur[2] === l3 && "active"), href: hrefFor(`${slug}/${l3}`) },
-                  titleOf(`${slug}/${l3}`),
-                ),
-              ),
-            )
-          : null
-
-        return h("div", { class: classNames("subnav-group", openNow && "open"), "data-slug": slug }, row, kidsWrap)
-      }),
-    )
+  if (curL1 && tree.children.size) {
+    sub = h("nav", { class: "section-subnav" }, ...renderNodes(tree))
   }
 
   return h(

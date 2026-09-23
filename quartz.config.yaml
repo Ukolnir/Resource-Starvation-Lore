@@ -14,6 +14,8 @@ configuration:
     - .obsidian
     - _Мастерское
     - Мастерское
+    - _Разработка
+    - 03_Разработка
     - _Шаблоны
   theme:
     fontOrigin: googleFonts

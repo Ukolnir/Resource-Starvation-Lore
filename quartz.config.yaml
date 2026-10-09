@@ -81,6 +81,10 @@ plugins:
       enableVideoEmbed: true
       enableCheckbox: true
     order: 30
+  # Ударения: «Лиор+ан» → значок над гласной у первого упоминания на странице.
+  - source: "./plugins/stress"
+    enabled: true
+    order: 35
   - source: "@quartz-community/github-flavored-markdown"
     enabled: true
     order: 40
@@ -208,6 +212,9 @@ plugins:
       position: left
       priority: 50
   - source: "./plugins/article-accordion"
+    enabled: true
+  # Картинки с обтеканием и подписью: ![[файл.png|справа Подпись|300]].
+  - source: "./plugins/figure"
     enabled: true
   - source: "./plugins/spell-filter"
     enabled: true

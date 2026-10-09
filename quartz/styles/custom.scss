@@ -249,6 +249,56 @@ footer {
   @include cut-corner($cut);
 }
 
+/* --- Ширина колонок и размер текста -------------------------------------
+   Правая колонка уже стандартных 320px — в ней обычно только оглавление,
+   освободившееся место уходит колонке статьи. Текст статьи на 1px крупнее
+   стандарта, чтобы строка в расширенной колонке не стала длиннее прежней. */
+@media (min-width: 1200px) {
+  .page > #quartz-body {
+    grid-template-columns: 320px auto 260px;
+
+    & .sidebar.right {
+      padding-left: 1.2rem;
+      padding-right: 1.2rem;
+    }
+  }
+}
+
+.page article {
+  font-size: 17px;
+
+  /* в базовых стилях интервал задан в rem (от 16px) — пересчитываем от шрифта */
+  & p,
+  & li,
+  & tbody {
+    line-height: 1.6;
+  }
+}
+
+/* --- Ударение: штрих над гласной (разметку ставит plugins/stress) --------
+   Значок рисуется отдельно от буквы, поэтому не зависит от шрифта, а в тексте
+   (поиск, копирование) остаётся обычная буква. У заглавных штрих выше. */
+.stress {
+  position: relative;
+}
+
+.stress::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0.06em;
+  width: 0.085em;
+  height: 0.3em;
+  border-radius: 0.04em;
+  background: var(--secondary);
+  transform: translateX(-10%) rotate(38deg);
+  pointer-events: none;
+}
+
+.stress.stress-cap::after {
+  top: -0.2em;
+}
+
 /* --- Фон: чешуя под радиальным затемнением + сетка 32×32 ----------------
    Цвета и коэффициенты — как в LoginView: центргасим почти в ноль, чтобы
    текст читался, к краям чешуя проявляется.
@@ -291,6 +341,77 @@ body::after {
 /* --- Выноски: главный блок в лорных текстах ----------------------------- */
 .callout {
   @include cut-corner(14px);
+}
+
+/* Модификаторы выносок — слова после | в типе: > [!info|справа без-иконки].
+   Можно несколько через пробел. Русские и английские слова равноправны.
+     справа / right     — карточка справа, текст обтекает её слева
+     слева / left       — то же слева
+     широкая / wide     — акцентный блок во всю ширину, крупнее текст
+     без-иконки / no-icon — без значка в заголовке */
+.callout[data-callout-metadata~="справа"],
+.callout[data-callout-metadata~="right"],
+.callout[data-callout-metadata~="слева"],
+.callout[data-callout-metadata~="left"] {
+  width: 280px;
+  max-width: 45%;
+  margin-top: 0.3rem;
+  margin-bottom: 1rem;
+  padding: 0 0.8rem;
+  font-size: 0.9em;
+
+  & > .callout-title {
+    padding: 0.7rem 0;
+  }
+}
+
+.callout[data-callout-metadata~="справа"],
+.callout[data-callout-metadata~="right"] {
+  float: right;
+  clear: right;
+  margin-left: 1.5rem;
+}
+
+.callout[data-callout-metadata~="слева"],
+.callout[data-callout-metadata~="left"] {
+  float: left;
+  clear: left;
+  margin-right: 1.5rem;
+}
+
+.callout[data-callout-metadata~="широкая"],
+.callout[data-callout-metadata~="wide"] {
+  clear: both;
+  margin: 1.5rem 0;
+  padding: 0.3rem 1.5rem 0.6rem;
+  font-size: 1.12em;
+  line-height: 1.6;
+}
+
+.callout[data-callout-metadata~="без-иконки"],
+.callout[data-callout-metadata~="no-icon"] {
+  & > .callout-title > .callout-icon {
+    display: none;
+  }
+}
+
+/* поплавки (выноски и картинки) не вылезают за свою секцию-аккордеон
+   и за конец статьи */
+.acc.open > .acc-body,
+article {
+  display: flow-root;
+}
+
+@media (max-width: 600px) {
+  .callout[data-callout-metadata~="справа"],
+  .callout[data-callout-metadata~="right"],
+  .callout[data-callout-metadata~="слева"],
+  .callout[data-callout-metadata~="left"] {
+    float: none;
+    width: auto;
+    max-width: 100%;
+    margin: 1rem 0;
+  }
 }
 
 /* --- Панели правой колонки: граф, оглавление, обратные ссылки ------------ */

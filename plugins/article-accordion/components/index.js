@@ -86,7 +86,9 @@ AccordionMarker.afterDOMLoaded = `
     const toOrd = parseInt(marker.dataset.to || "99", 10);
     // реальные уровни заголовков на странице (по возрастанию), порядковый → фактический
     const levels = [...new Set([...container.querySelectorAll("h1,h2,h3,h4,h5,h6")].map((h) => lvlOf(h)))].sort((a, b) => a - b);
-    if (!levels.length) { container.dataset.accordionized = "1"; return; }
+    // уровня «от» на странице нет (аккордеон: 4, а уровней всего 2) — сворачивать нечего;
+    // раньше он подменялся самым глубоким существующим уровнем
+    if (!levels.length || fromOrd > levels.length) { container.dataset.accordionized = "1"; return; }
     const actualFrom = levels[Math.min(levels.length, fromOrd) - 1];
     const actualTo = levels[Math.min(levels.length, toOrd) - 1];
 
